@@ -1,8 +1,10 @@
 # rmntrvn_infra
 rmntrvn Infra repository
 
+```
 bastion_IP = 34.76.51.166
 someinternalhost_IP = 10.132.0.4
+```
 
 0. Был сгенерирован и добавлен SSH ключ для автоматического проброса на виртуальные машины.
 1. Созданы 2 хоста: *bastion* и *someinernalhost*.
