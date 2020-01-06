@@ -1,6 +1,8 @@
 # rmntrvn_infra
 rmntrvn Infra repository
 
+## Домашняя работа "Знакомство с облачной инфраструктурой и облачными сервисами"
+
 ```
 bastion_IP = 34.76.51.166
 someinternalhost_IP = 10.132.0.4
@@ -239,3 +241,74 @@ rmntrvn@someinternalhost:~$ ip a
     inet6 fe80::4001:aff:fe84:4/64 scope link
        valid_lft forever preferred_lft forever
 ```
+
+---
+
+## Домашняя работа "Основные сервисы Google Cloud Platform (GCP)"
+
+```
+testapp_IP = 35.187.75.185
+testapp_port = 9292
+```
+
+1. Установлена утилита gcloud на локальную машину и проинициализирована аккаунт.
+
+2. Создан инстанс командой.
+```
+gcloud compute instances create reddit-app \
+  --boot-disk-size=10GB \
+  --image-family ubuntu-1604-lts \
+  --image-project=ubuntu-os-cloud \
+  --machine-type=g1-small \
+  --tags puma-server \
+  --restart-on-failure
+  ```
+
+3. Созданые скрипты:
+- [Установка Ruby](install_ruby.sh)
+- [Установка MongoDB 3.2](install_mongod.sh)
+- [Разворачивание приложения](deploy.sh)
+- [Скрипт автоматизации предыдущих скриптов](startup_script.sh)
+
+4. Создание инстанса с использованием скрипта [startup_script.sh](startup_script.sh)
+```
+gcloud compute instances create reddit-app \
+  --boot-disk-size=10GB \
+  --image-family ubuntu-1604-lts \
+  --image-project=ubuntu-os-cloud \
+  --machine-type=g1-small \
+  --tags puma-server \
+  --restart-on-failure \
+  --zone europe-west1-d \
+  --metadata-from-file startup-script=startup_script.sh
+```
+
+Машина создана.
+```
+WARNING: You have selected a disk size of under [200GB]. This may result in poor I/O performance. For more information, see: https://developers.google.com/compute/docs/disks#performance.
+Created [https://www.googleapis.com/compute/v1/projects/infra-263911/zones/europe-west1-d/instances/reddit-app].
+NAME        ZONE            MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP    STATUS
+reddit-app  europe-west1-d  g1-small                   10.132.0.5   35.187.75.185  RUNNING
+```
+
+Проверим порт:
+```
+rmntrvn@reddit-app:~$ ps aux | grep puma
+root      9501  0.2  1.5 513720 26872 ?        Sl   17:48   0:00 puma 3.10.0 (tcp://0.0.0.0:9292) [reddit]
+rmntrvn   9565  0.0  0.0  12944   984 pts/1    S+   17:50   0:00 grep --color=auto puma
+```
+
+5. Создано правило
+```
+gcloud compute firewall-rules create default-puma-server --allow tcp:9292 --target-tags 'puma-server' --source-ranges 0.0.0.0/0
+```
+Результат.
+```
+Creating firewall...done.
+NAME                 NETWORK  DIRECTION  PRIORITY  ALLOW     DENY  DISABLED
+default-puma-server  default  INGRESS    1000      tcp:9292        False
+```
+
+---
+
+## NEXT WORK
