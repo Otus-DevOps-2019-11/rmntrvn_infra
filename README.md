@@ -311,4 +311,24 @@ default-puma-server  default  INGRESS    1000      tcp:9292        False
 
 ---
 
+## Домашняя работа "Модели управления инфраструктурой Packer"
+
+1. Создана ветка *packer-base*. Скрипты с предыдущего домашнего задания перенесены в директорию *config-scripts*.
+2. Установлен *Packer*, для *gcloud* предоставлены доступы.
+3. В директории *packer* создан шаблон [ubuntu16.json](packer/ubuntu16.json)
+4. Собран образ командой.
+```
+packer build ubuntu16.json
+```
+5. Создаём виртуальную машину с использованием созданного образа reddit-base, проверяем подключение по ssh и разворачиваем приложение:
+```
+git clone -b monolith https://github.com/express42/reddit.git
+cd reddit && bundle install
+puma -d
+```
+6. Проверяем работу приложения `<public_ip>:9292` и коммитим в созданную ветку.
+7. Выполнено самостоятельное задание с параметризацией переменных.
+8. Выполнено задание со (*) - создан файл [immutable.json](packer/immutable.json) для сборки образа.
+9. Выполнено задание со (*) - создан файл [create-reddit-vm.sh](config-scripts/create-reddit-vm.sh) для автоматического создания виртуальной машины с использованием образа reddit-full через gcloud утилиту.
+
 ## NEXT WORK
