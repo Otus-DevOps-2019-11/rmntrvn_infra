@@ -338,12 +338,12 @@ puma -d
 
 | Файл | Описание |
 |------------------------------------------------------|-------------------------------|
-| (main.tf)[terraform/main.tf] | Основной файл терраформа |
-| (lb.tf)[lb.tf/lb.tf] | Конфигурация балансировщика |
-| (outputs.tf)[outputs.tf] | Выходная переменная IP адреса |
-| (terraform.tfvars)[terraform.tfvars] | Файл значений переменных |
-| (terraform.tfvars.example)[terraform.tfvars.example] | Файл примера переменных |
-| (variables.tf)[variables.tf] | Файл переменных |
+| [main.tf](./terraform/main.tf) | Основной файл терраформа |
+| [lb.tf](./terraform/lb.tf) | Конфигурация балансировщика |
+| [outputs.tf](./terraform/outputs.tf) | Выходная переменная IP адреса |
+| [terraform.tfvars](./terraform/terraform.tfvars) | Файл значений переменных |
+| [terraform.tfvars.example](terraform/tfvars.example) | Файл примера переменных |
+| [variables.tf](./terraform/variables.tf) | Файл переменных |
 
 2. Чтобы запустить проект необходимо выполнить следующую команду.
 ```
@@ -374,3 +374,94 @@ ServiceException: 409 Bucket storage-bucket-rmntrvn1337 already exists.
 7. (**) Выполнено задание с добавление *provisioner* в модули.
 
 ## Домашняя работа "Управление конфигурацией. Знакомство с Ansible"
+
+0. Создана ветка *ansible-1*.
+1. Установлен *ansible*.
+2. Создан [inventory](./ansible/inventory)-файл в формете INI с указанием хостов, поднятых в GCP.
+3. Проверена работа *ansible* для управления хостами.
+4. Создан файл [ansible.cfg](./ansible/ansible.cfg) для указания статических данных для хостов.
+5. Создан файл [inventory.yml](./ansible/inventory.yml) с формет YAML.
+6. Проверена работа модулей *command* и *shell*.
+7. Клонирован репозиторий приложения используя *ansible*. При повторном выполнении задачи клонирования с использованием файл [clone.yml](./ansible/clone.yml) видим, что файл применен, но конфигурация на сервере не изменена, т.к. файлы одинаковые.
+```
+$ ansible-playbook clone.yml
+
+PLAY [Clone] *************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************************************************
+[DEPRECATION WARNING]: Distribution Ubuntu 16.04 on host appserver should use /usr/bin/python3, but is using /usr/bin/python for backward compatibility with prior
+Ansible releases. A future Ansible release will default to using the discovered platform python for this host. See
+https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be removed in version 2.12. Deprecation
+warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+ok: [appserver]
+
+TASK [Clone repo] ********************************************************************************************************************************************************
+ok: [appserver]
+
+PLAY RECAP ***************************************************************************************************************************************************************
+appserver                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
+8. При выполнении команды `ansible app -m command -a 'rm -rf ~/reddit'` и повторном выполнении плейбука наблюдаем, что были приняты изменения, выполнямые в плейбуке.
+```
+$ ansible app -m command -a 'rm -rf ~/reddit'
+[WARNING]: Consider using the file module with state=absent rather than running 'rm'.  If you need to use command because file is insufficient you can add 'warn: false'
+to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this message.
+
+[DEPRECATION WARNING]: Distribution Ubuntu 16.04 on host appserver should use /usr/bin/python3, but is using /usr/bin/python for backward compatibility with prior
+Ansible releases. A future Ansible release will default to using the discovered platform python for this host. See
+https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be removed in version 2.12. Deprecation
+warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+appserver | CHANGED | rc=0 >>
+
+
+$ ansible-playbook clone.yml
+
+PLAY [Clone] *************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************************************************
+[DEPRECATION WARNING]: Distribution Ubuntu 16.04 on host appserver should use /usr/bin/python3, but is using /usr/bin/python for backward compatibility with prior
+Ansible releases. A future Ansible release will default to using the discovered platform python for this host. See
+https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be removed in version 2.12. Deprecation
+warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+ok: [appserver]
+
+TASK [Clone repo] ********************************************************************************************************************************************************
+changed: [appserver]
+
+PLAY RECAP ***************************************************************************************************************************************************************
+appserver                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+```
+
+9. (*) Конвертирован файл (inventory.yml)[./inventory.yml] в (inventory.json)[./inventory.json].
+ - Получена статическая конфигурация json файла инвентаризации.
+ - Написан скрипт [get_dyn_inventory.sh](./ansible/get_dyn_inventory.sh) для динамического получения данных о хостах.
+ - Проверена работы скрипта.
+ ```
+ $ ansible all -i create_dyn_inventory.sh -m ping
+[DEPRECATION WARNING]: Distribution Ubuntu 16.04 on host 104.199.43.190 should use /usr/bin/python3, but is using /usr/bin/python for backward compatibility with prior
+Ansible releases. A future Ansible release will default to using the discovered platform python for this host. See
+https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be removed in version 2.12. Deprecation
+warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+104.199.43.190 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+[DEPRECATION WARNING]: Distribution Ubuntu 16.04 on host 34.76.35.235 should use /usr/bin/python3, but is using /usr/bin/python for backward compatibility with prior
+Ansible releases. A future Ansible release will default to using the discovered platform python for this host. See
+https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be removed in version 2.12. Deprecation
+warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+34.76.35.235 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+ ```
+
+---
+
+## Домашняя работа "Продолжение знакомства с Ansible: templates, handlers, dynamic inventory, vault, tags"
