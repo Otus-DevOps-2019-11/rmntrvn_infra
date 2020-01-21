@@ -23,18 +23,18 @@ resource "google_compute_instance" "app" {
     agent       = false
     private_key = file(var.rmntrvn_private_key_path)
   }
-  provisioner "file" {
-    source      = "../modules/app/files/puma.service"
-    destination = "/tmp/puma.service"
-  }
-  provisioner "remote-exec" {
-    script = "../modules/app/files/deploy.sh"
-  }
-  provisioner "remote-exec" {
-    inline = [
-      "echo export DATABASE_URL=\"${var.database_url}\" >> ~/.profile"
-    ]
-  }
+#  provisioner "file" {
+#    source      = "../modules/app/files/puma.service"
+#    destination = "/tmp/puma.service"
+#  }
+#  provisioner "remote-exec" {
+#    script = "../modules/app/files/deploy.sh"
+#  }
+#  provisioner "remote-exec" {
+#    inline = [
+#      "echo export DATABASE_URL=\"${var.database_url}\" >> ~/.profile"
+#    ]
+#  }
 }
 
 resource "google_compute_address" "app_ip" {

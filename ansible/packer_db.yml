@@ -1,0 +1,33 @@
+---
+- name: Install MongoDB
+  hosts: all
+  become: true
+  tasks:
+    - name: Install python-apt
+      apt:
+        name: python-apt
+        state: present
+
+    - name: Add APT-key
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: E52529D4
+
+    - name: Add APT-repository
+      apt_repository:
+        repo: deb [ arch=amd64,arm64] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse
+        state: present
+
+    - name: Update package-cache
+      apt:
+        update_cache: yes
+
+    - name: Install mongodb
+      apt:
+        name: mongodb-org
+        state: present
+
+    - name: Enable mongod service
+      systemd:
+        name: mongod
+        enabled: yes
