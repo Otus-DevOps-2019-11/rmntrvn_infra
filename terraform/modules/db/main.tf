@@ -24,7 +24,7 @@ resource "google_compute_instance" "db" {
     private_key = file(var.rmntrvn_private_key_path)
   }
 
-  provisioner "remote-exec" {
-    inline = ["sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf && sudo service mongod restart"]
-  }
+#  provisioner "remote-exec" {
+#    inline = ["sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf && sudo service mongod restart"]
+#  }
 }

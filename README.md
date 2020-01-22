@@ -465,3 +465,25 @@ warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
 ---
 
 ## Домашняя работа "Продолжение знакомства с Ansible: templates, handlers, dynamic inventory, vault, tags"
+
+0. Создана ветка *ansible-2*.
+1. В результате всех действий созданы плейбуки *app.yml*, *db.yml*, *deploy.yml*, которые импортированы и запускаются из *site.yml*, на основе собранных образов *packer*.
+2. Образы необходимо собрать командой в корне репозитория:
+Для DB ноды:
+```
+packer build -var-file=packer/variables.json packer/db.json
+```
+Для APP ноды:
+```
+packer build -var-file=packer/variables.json packer/app.json
+```
+3. Для проверкии выполнить:
+```
+cd terraform/stage && terraform apply -auto-approve=false
+```
+В результате чего будут созданы 2 ноды. Полученный в результате IP (*db_external_ip*) для DB ноды нужно указать в файле *app.yml* для переменной *db_host*.
+Далее необходимо выполнить следующую команду.
+```
+cd ansible/ && ansible-playbook site.yml
+```
+После чего перейти по URL `<app_external_ip>:9292`.
