@@ -487,3 +487,40 @@ cd terraform/stage && terraform apply -auto-approve=false
 cd ansible/ && ansible-playbook site.yml
 ```
 После чего перейти по URL `<app_external_ip>:9292`.
+
+## Домашняя работа "Ansible роли, управление настройками нескольких окружений и best practices."
+
+0. Создана ветка *ansible-3*.
+1. Созданные ранее плейбуки перенесены в отдельные роли *app* и *db* в директории *roles*.
+2. Созданы инвентори файлы и файлы с перемеменными для окружений *prod* и *stage* в директории *environments*.
+3. В директории *ansible* плейбуки и созданные ранее файлы убраны в соответствующие директории.
+4. Использована импортированная роль для проксирования *nginx*.
+5. Использован *ansible-vault* для шифрования данных для плейбука *users.yml*. Проверены доступы после отработки плейбука.
+```
+$ ssh rmntrvn@35.190.220.190
+Welcome to Ubuntu 16.04.6 LTS (GNU/Linux 4.15.0-1052-gcp x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+ * Overheard at KubeCon: "microk8s.status just blew my mind".
+
+     https://microk8s.io/docs/commands#microk8s.status
+
+0 packages can be updated.
+0 updates are security updates.
+
+New release '18.04.3 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+Last login: Sat Jan 25 23:25:29 2020 from 46.0.216.56
+/usr/bin/xauth:  file /home/rmntrvn/.Xauthority does not exist
+
+rmntrvn@reddit-app:~$ su - admin
+Password:
+admin@reddit-app:~$
+```
+6. (*) Использован плагин GCP для динамического инвентори окружений *prod* и *stage*.
+7. (**) Настроены скрипты *TravisCI* для контроля состояния репозитория.

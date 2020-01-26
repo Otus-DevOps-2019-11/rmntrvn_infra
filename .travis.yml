@@ -1,10 +1,42 @@
 dist: trusty
 sudo: required
 language: bash
+env:
+  global:
+  - terraform="0.12.18"
+  - terraform_linter="0.13.4"
 before_install:
 - curl https://raw.githubusercontent.com/express42/otus-homeworks/2019-11/run.sh |
   bash
+- wget https://releases.hashicorp.com/packer/1.0.4/packer_1.0.4_linux_amd64.zip -O /tmp/packer.zip
+- sudo mv /usr/local/bin/packer /usr/local/bin/packer_back
+- sudo unzip -d /usr/local/bin/ /tmp/packer.zip
+- pip install -r ansible/requirements.txt
+- pip install ansible-lint
+- wget https://releases.hashicorp.com/terraform/${terraform}/terraform_${terraform}_linux_amd64.zip -O /tmp/terraform.zip
+- sudo unzip -d /usr/local/bin/ /tmp/terraform.zip
+- wget https://github.com/terraform-linters/tflint/releases/download/v${terraform_linter}/tflint_linux_amd64.zip -O /tmp/tflint.zip
+- sudo unzip -d /usr/local/bin/ /tmp/tflint.zip
+script:
+- packer --version
+- ansible --version
+- terraform --version
+- tflint --version
+- packer validate -var-file=packer/variables.json.example packer/app.json
+- packer validate -var-file=packer/variables.json.example packer/db.json
+- cp terraform/prod/terraform.tfvars.example terraform/prod/terraform.tfvars
+- cp terraform/stage/terraform.tfvars.example terraform/stage/terraform.tfvars
+- terraform get terraform/stage
+- find terraform/stage -type f -name '*.tf' -exec tflint --ignore-module=SweetOps/storage-bucket/google {} \;
+- terraform get terraform/prod
+- find terraform/prod -type f -name '*.tf' -exec tflint --ignore-module=SweetOps/storage-bucket/google {} \;
+- find ansible/playbooks/ -type f -name '*.yml' -exec ansible-lint {} \;
+- find ansible/roles/ -type f -name '*.yml' -exec ansible-lint {} \;
+- find ansible/environments/ -type f -name '*.yml' -exec ansible-lint {} \;
 notifications:
   slack:
     rooms:
       secure: PtNCWNasb87PMmB35LQk74D3MQIJ6sdvLuaqnNDrf6x0l5AP302EGPDolNRxKsfUOgeB/ISx3f+gQAY/F0PtxjSNmu2ejYZC6vFARQoO4TzcuGkmzrjvQPfEdZBgS+XvXesA6cN4I1+yFucXRDVrAfuj1bt6MFopkqJntg0n3hNThgLO6c9kRTL+dxcP3PkrZJAhYh66ImShm+Cb/PZFyFcSzNpeXbRu4tKYSYJ3aMCym85DH/fIRVz09wfIrXVnYci3/Dx3TCAXe5450iBzGOBExcuqth+lZC3VKuERAwN6CWUp3JdX7Ma+qPGQ02JFVKhaGVVMEV7ZZX5t9r4OJ3TnKBExz/QsrlN4/zjqN94pV1xAixC0kaDWXnGwUTBLS5wIN0WDVRe/4RycUBW4495+V6wrI2kPlo3Aa+xs9nZ/AWAghejMik5m+33ZxC/uHGoKr4W9FSCpdQ9/NItqJTDfn53YzDwF7YiR8UA0apFPAGdR90GZaIM9FV0YRMahDGoojOxuMcO/jHwhdkz8INxJQvWMQd3hk0pUcviuCj+fQGXx6yFJCpF2tnTE7Pw9CbnZ1fFbBx5S4kjY7lgSbdSaRZA5f3703bOZh+qs+NAhGZl8mVgu/cLcpaywb+IHRKiCfTzEJ9BXsakM6TVA5ORGTLMRN6z+9QIF8vTUuRk=
+branches:
+  only:
+    - ansible-3
