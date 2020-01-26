@@ -11,18 +11,13 @@ before_install:
 - wget https://releases.hashicorp.com/packer/1.0.4/packer_1.0.4_linux_amd64.zip -O /tmp/packer.zip
 - sudo mv /usr/local/bin/packer /usr/local/bin/packer_back
 - sudo unzip -d /usr/local/bin/ /tmp/packer.zip
+- sudo pip install --upgrade pip
 - pip install -r ansible/requirements.txt
 - pip install ansible-lint
 - wget https://releases.hashicorp.com/terraform/${terraform}/terraform_${terraform}_linux_amd64.zip -O /tmp/terraform.zip
 - sudo unzip -d /usr/local/bin/ /tmp/terraform.zip
 - wget https://github.com/terraform-linters/tflint/releases/download/v${terraform_linter}/tflint_linux_amd64.zip -O /tmp/tflint.zip
 - sudo unzip -d /usr/local/bin/ /tmp/tflint.zip
-
-install:
-- pip install --upgrade pip
-- python get-pip.py --user
-- pip install --user ansible
-- pip install --user ansible-lint
 
 script:
 - tflint -v
