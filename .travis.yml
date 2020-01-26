@@ -19,6 +19,7 @@ before_install:
 - sudo unzip -d /usr/local/bin/ /tmp/tflint.zip
 
 install:
+- pip install --upgrade pip
 - python get-pip.py --user
 - pip install --user ansible
 - pip install --user ansible-lint
