@@ -17,22 +17,43 @@ before_install:
 - sudo unzip -d /usr/local/bin/ /tmp/terraform.zip
 - wget https://github.com/terraform-linters/tflint/releases/download/v${terraform_linter}/tflint_linux_amd64.zip -O /tmp/tflint.zip
 - sudo unzip -d /usr/local/bin/ /tmp/tflint.zip
+
+install:
+- python get-pip.py --user
+- pip install --user ansible
+- pip install --user ansible-lint
+
 script:
+- tflint -v
 - packer --version
-- ansible --version
 - terraform --version
-- tflint --version
-- packer validate -var-file=packer/variables.json.example packer/app.json
+- ansible --version
+- ansible-lint --version
+
 - packer validate -var-file=packer/variables.json.example packer/db.json
-- cp terraform/prod/terraform.tfvars.example terraform/prod/terraform.tfvars
-- cp terraform/stage/terraform.tfvars.example terraform/stage/terraform.tfvars
-- terraform get terraform/stage
-- find terraform/stage -type f -name '*.tf' -exec tflint --ignore-module=SweetOps/storage-bucket/google {} \;
-- terraform get terraform/prod
-- find terraform/prod -type f -name '*.tf' -exec tflint --ignore-module=SweetOps/storage-bucket/google {} \;
-- find ansible/playbooks/ -type f -name '*.yml' -exec ansible-lint {} \;
-- find ansible/roles/ -type f -name '*.yml' -exec ansible-lint {} \;
-- find ansible/environments/ -type f -name '*.yml' -exec ansible-lint {} \;
+- packer validate -var-file=packer/variables.json.example packer/app.json
+
+- cd terraform
+- terraform get
+- terraform init
+- terraform validate -var-file terraform.tfvars.example
+
+- cd stage
+- terraform get
+- terraform init -backend=false
+- terraform validate
+
+- cd ../prod
+- terraform get
+- terraform init -backend=false
+- terraform validate
+
+- tflint terraform/
+- tflint terraform/stage
+- tflint terraform/prod
+
+- ansible-lint ansible/playbooks/*.yml --exclude=roles/jdauphant.nginx
+
 notifications:
   slack:
     rooms:
