@@ -44,9 +44,8 @@ script:
 - terraform init -backend=false
 - terraform validate
 
-- tflint terraform/
-- tflint terraform/stage
-- tflint terraform/prod
+- find terraform/stage -type f -name '*.tf' -exec tflint --ignore-module=SweetOps/storage-bucket/google {} \;
+- find terraform/prod -type f -name '*.tf' -exec tflint --ignore-module=SweetOps/storage-bucket/google {} \;
 
 - ansible-lint ansible/playbooks/*.yml --exclude=roles/jdauphant.nginx
 
